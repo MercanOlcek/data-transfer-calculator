@@ -16,7 +16,7 @@ class AppState:
     input_buffer: str = ""
     pending_tb: float | None = None
     calc_result: str = ""
-    status_message: str = "Hazır"
+    status_message: str = "Ready"
     local_ip: str = "Unavailable"
     public_info: dict = field(default_factory=dict)
     history: list[str] = field(default_factory=list)
@@ -37,10 +37,10 @@ def refresh_ip(state: AppState) -> None:
     state.history.insert(0, entry)
     state.history = state.history[:8]
     if status == "success":
-        state.status_message = "IP bilgileri güncellendi."
+        state.status_message = "IP information updated."
     else:
-        msg = state.public_info.get("message") or "Bilinmeyen hata"
-        state.status_message = f"IP takibi güncellendi (hata: {msg})."
+        msg = state.public_info.get("message") or "Unknown error"
+        state.status_message = f"IP tracking updated (error: {msg})."
 
 
 def clipped(text: str, width: int) -> str:
@@ -128,7 +128,7 @@ def render(stdscr, state: AppState, colors: dict[str, int]) -> None:
     width = max(40, width)
     height = max(16, height)
 
-    note = "This app tool developed by Mercan Ölçek"
+    note = "This app tool developed by Mercan Olcek"
     subtitle = "Data Transfer Time Calculator"
     safe_addstr(
         stdscr,
@@ -153,17 +153,17 @@ def render(stdscr, state: AppState, colors: dict[str, int]) -> None:
     draw_box(stdscr, ip_y, ip_x, ip_w, ip_h, "IP Tracker", colors["box"])
     info = state.public_info or {}
     lines = [
-        f"Yerel IP : {state.local_ip}",
-        f"Genel IP : {info.get('public_ip', 'Bilinmiyor')}",
-        f"Konum    : {info.get('city', '-')}, {info.get('region', '-')} / {info.get('country', '-')}",
-        f"ISP      : {info.get('isp', '-')}",
-        f"Saat Dil.: {info.get('timezone', '-')}",
-        f"Son Kont.: {info.get('checked_at', '-')}",
+        f"Local IP   : {state.local_ip}",
+        f"Public IP  : {info.get('public_ip', 'Unknown')}",
+        f"Location   : {info.get('city', '-')}, {info.get('region', '-')} / {info.get('country', '-')}",
+        f"ISP        : {info.get('isp', '-')}",
+        f"Timezone   : {info.get('timezone', '-')}",
+        f"Last Check : {info.get('checked_at', '-')}",
     ]
     if info.get("status") == "error" and info.get("message"):
-        lines.append(f"Durum    : Hata - {info.get('message')}")
+        lines.append(f"Status     : Error - {info.get('message')}")
     else:
-        lines.append(f"Durum    : {info.get('status', 'bilinmiyor')}")
+        lines.append(f"Status     : {info.get('status', 'unknown')}")
     for i, line in enumerate(lines[: ip_h - 2]):
         safe_addstr(stdscr, ip_y + 1 + i, ip_x + 2, clipped(line, ip_w - 4), colors.get("text", 0))
 
@@ -172,27 +172,27 @@ def render(stdscr, state: AppState, colors: dict[str, int]) -> None:
     main_h = 8
     main_x = max(2, (width - main_w) // 2)
     main_y = ip_y + ip_h + 1
-    draw_box(stdscr, main_y, main_x, main_w, main_h, "Veri Aktarım Hesaplayıcı", colors["box"])
+    draw_box(stdscr, main_y, main_x, main_w, main_h, "Data Transfer Calculator", colors["box"])
     row = main_y + 1
     inner_w = main_w - 4
     text_attr = colors.get("text", 0)
     bold_attr = colors.get("bold", curses.A_BOLD)
 
     if state.mode == "menu":
-        safe_addstr(stdscr, row, main_x + 2, clipped("Hesaplama için 'c' tuşuna basın.", inner_w), text_attr)
-        safe_addstr(stdscr, row + 1, main_x + 2, clipped("IP bilgilerini yenilemek için 'r' tuşuna basın.", inner_w), text_attr)
-        safe_addstr(stdscr, row + 2, main_x + 2, clipped("Çıkmak için 'q' tuşuna basın.", inner_w), text_attr)
+        safe_addstr(stdscr, row, main_x + 2, clipped("Press 'c' to calculate.", inner_w), text_attr)
+        safe_addstr(stdscr, row + 1, main_x + 2, clipped("Press 'r' to refresh IP information.", inner_w), text_attr)
+        safe_addstr(stdscr, row + 2, main_x + 2, clipped("Press 'q' to quit.", inner_w), text_attr)
         if state.calc_result:
-            safe_addstr(stdscr, row + 4, main_x + 2, clipped(f"Son sonuç: {state.calc_result}", inner_w), bold_attr)
+            safe_addstr(stdscr, row + 4, main_x + 2, clipped(f"Last result: {state.calc_result}", inner_w), bold_attr)
     elif state.mode == "calc_tb":
-        prompt = f"Veri miktarı (TB): {state.input_buffer}"
+        prompt = f"Data size (TB): {state.input_buffer}"
         safe_addstr(stdscr, row, main_x + 2, clipped(prompt, inner_w), bold_attr)
-        safe_addstr(stdscr, row + 2, main_x + 2, clipped("Sayı girin, Enter ile onaylayın, Esc ile iptal.", inner_w), text_attr)
+        safe_addstr(stdscr, row + 2, main_x + 2, clipped("Enter a number, press Enter to confirm, Esc to cancel.", inner_w), text_attr)
     elif state.mode == "calc_speed":
-        safe_addstr(stdscr, row, main_x + 2, clipped(f"Veri miktarı: {state.pending_tb} TB", inner_w), text_attr)
-        prompt = f"İnternet hızı (Mbit/s): {state.input_buffer}"
+        safe_addstr(stdscr, row, main_x + 2, clipped(f"Data size: {state.pending_tb} TB", inner_w), text_attr)
+        prompt = f"Internet speed (Mbit/s): {state.input_buffer}"
         safe_addstr(stdscr, row + 1, main_x + 2, clipped(prompt, inner_w), bold_attr)
-        safe_addstr(stdscr, row + 3, main_x + 2, clipped("Sayı girin, Enter ile hesapla, Esc ile iptal.", inner_w), text_attr)
+        safe_addstr(stdscr, row + 3, main_x + 2, clipped("Enter a number, press Enter to calculate, Esc to cancel.", inner_w), text_attr)
     elif state.mode == "result":
         safe_addstr(stdscr, row, main_x + 2, clipped("Estimated transfer time:", inner_w), bold_attr)
         safe_addstr(stdscr, row + 1, main_x + 2, clipped(state.calc_result, inner_w), text_attr)
@@ -204,9 +204,9 @@ def render(stdscr, state: AppState, colors: dict[str, int]) -> None:
     hist_x = max(2, (width - hist_w) // 2)
     hist_y = main_y + main_h + 1
     if hist_y + hist_h <= height - 2:
-        draw_box(stdscr, hist_y, hist_x, hist_w, hist_h, "IP Takip Geçmişi", colors["box"])
+        draw_box(stdscr, hist_y, hist_x, hist_w, hist_h, "IP Tracking History", colors["box"])
         if not state.history:
-            safe_addstr(stdscr, hist_y + 1, hist_x + 2, clipped("Henüz kayıt yok.", hist_w - 4), text_attr)
+            safe_addstr(stdscr, hist_y + 1, hist_x + 2, clipped("No records yet.", hist_w - 4), text_attr)
         else:
             for i, entry in enumerate(state.history[: hist_h - 2]):
                 safe_addstr(stdscr, hist_y + 1 + i, hist_x + 2, clipped(entry, hist_w - 4), text_attr)
@@ -215,15 +215,15 @@ def render(stdscr, state: AppState, colors: dict[str, int]) -> None:
     status_y = height - 2
     help_y = height - 1
     if status_y >= 0:
-        status_line = clipped(f" Durum: {state.status_message}", width - 1)
+        status_line = clipped(f" Status: {state.status_message}", width - 1)
         safe_addstr(stdscr, status_y, 0, status_line.ljust(max(0, width - 1)), colors["status"])
     if help_y >= 0:
-        help_line = clipped(" [C] Hesapla  [R] IP Yenile  [Q] Çıkış  |  This app tool developed by Mercan Ölçek", width - 1)
+        help_line = clipped(" [C] Calculate  [R] Refresh IP  [Q] Quit  |  This app tool developed by Mercan Olcek", width - 1)
         safe_addstr(stdscr, help_y, 0, help_line.ljust(max(0, width - 1)), colors["help"])
 
     # Cursor for input
     if state.mode == "calc_tb":
-        cursor_x = min(main_x + 2 + len("Veri miktarı (TB): ") + len(state.input_buffer), main_x + main_w - 2)
+        cursor_x = min(main_x + 2 + len("Data size (TB): ") + len(state.input_buffer), main_x + main_w - 2)
         cursor_y = main_y + 1
         try:
             curses.curs_set(1)
@@ -231,7 +231,7 @@ def render(stdscr, state: AppState, colors: dict[str, int]) -> None:
         except curses.error:
             pass
     elif state.mode == "calc_speed":
-        cursor_x = min(main_x + 2 + len("İnternet hızı (Mbit/s): ") + len(state.input_buffer), main_x + main_w - 2)
+        cursor_x = min(main_x + 2 + len("Internet speed (Mbit/s): ") + len(state.input_buffer), main_x + main_w - 2)
         cursor_y = main_y + 2
         try:
             curses.curs_set(1)
@@ -285,7 +285,7 @@ def run_tui(stdscr) -> None:
     state.local_ip = get_local_ip()
     state.public_info = {
         "status": "loading",
-        "public_ip": "Yükleniyor...",
+        "public_ip": "Loading...",
         "city": "-",
         "region": "-",
         "country": "-",
@@ -294,7 +294,7 @@ def run_tui(stdscr) -> None:
         "checked_at": "-",
         "message": "",
     }
-    state.status_message = "IP bilgileri alınıyor..."
+    state.status_message = "Loading IP information..."
 
     render(stdscr, state, colors)
     refresh_ip(state)
@@ -311,7 +311,7 @@ def run_tui(stdscr) -> None:
             if ch in (ord('q'), ord('Q')):
                 break
             if ch in (ord('r'), ord('R')):
-                state.status_message = "IP bilgileri yenileniyor..."
+                state.status_message = "Refreshing IP information..."
                 render(stdscr, state, colors)
                 refresh_ip(state)
                 render(stdscr, state, colors)
@@ -320,7 +320,7 @@ def run_tui(stdscr) -> None:
                 state.mode = "calc_tb"
                 state.input_buffer = ""
                 state.pending_tb = None
-                state.status_message = "Veri miktarını girin (TB)."
+                state.status_message = "Enter data size (TB)."
                 render(stdscr, state, colors)
                 continue
             render(stdscr, state, colors)
@@ -331,27 +331,27 @@ def run_tui(stdscr) -> None:
                 state.mode = "menu"
                 state.input_buffer = ""
                 state.pending_tb = None
-                state.status_message = "İşlem iptal edildi."
+                state.status_message = "Operation cancelled."
                 render(stdscr, state, colors)
                 continue
 
             if ch in (curses.KEY_ENTER, 10, 13):
                 value = parse_positive_float(state.input_buffer)
                 if value is None:
-                    state.status_message = "Geçerli, sıfırdan büyük bir sayı girin."
+                    state.status_message = "Enter a valid number greater than zero."
                     render(stdscr, state, colors)
                     continue
                 if state.mode == "calc_tb":
                     state.pending_tb = value
                     state.mode = "calc_speed"
                     state.input_buffer = ""
-                    state.status_message = "İnternet hızını girin (Mbit/s)."
+                    state.status_message = "Enter internet speed (Mbit/s)."
                 else:
                     assert state.pending_tb is not None
                     state.calc_result = format_duration(state.pending_tb, value)
                     state.mode = "result"
                     state.input_buffer = ""
-                    state.status_message = "Hesaplama tamamlandı."
+                    state.status_message = "Calculation completed."
                 render(stdscr, state, colors)
                 continue
 
@@ -364,7 +364,7 @@ def run_tui(stdscr) -> None:
 
         if state.mode == "result":
             state.mode = "menu"
-            state.status_message = "Hazır"
+            state.status_message = "Ready"
             render(stdscr, state, colors)
             continue
 
@@ -374,8 +374,8 @@ def main() -> None:
 
     if not sys.stdin.isatty() or not sys.stdout.isatty():
         print(
-            "Bu uygulama etkileşimli bir terminal (TTY) gerektirir.\n"
-            "Lütfen gerçek bir terminal emülatöründe çalıştırın:\n"
+            "This application requires an interactive terminal (TTY).\n"
+            "Please run it in a real terminal emulator:\n"
             "  cd /home/mercan/mega && ./megagigawhat/bin/python app.py",
             file=sys.stderr,
         )

@@ -1,23 +1,19 @@
 # Data Transfer Time Calculator & IP Tracker
 
 A simple Python terminal (TUI) app that calculates estimated data transfer time and tracks IP information.  
-**Developed by Mercan Ölçek.**
+**Developed by Mercan Olcek.**
 
 
 
-![Screenshot 1](screenshots/Screenshot%20From%202026-11-21%2018-14-27.png)
+![Screenshot 1](screenshots/Screenshot%20From%202026-11-21%2018-46-27.png)
 
-**Description:** Main TUI screen showing the IP tracker, calculator panel, and controls.
+**Description:** Main TUI screen showing the IP tracker, data transfer calculator, and controls in English.
 
-![Screenshot 2](screenshots/Screenshot%20From%202026-11-21%2018-14-45.png)
+![Screenshot 2](screenshots/Screenshot%20From%202026-11-21%2018-46-31.png)
 
-**Description:** IP tracker view showing local/public IP details and status information.
+**Description:** Calculator input screen where the user enters data size and internet speed.
 
-![Screenshot 3](screenshots/Screenshot%20From%202026-11-21%2018-15-02.png)
-
-**Description:** Calculator input flow where the user enters data size (TB) and internet speed (Mbit/s).
-
-![Screenshot 4](screenshots/Screenshot%20From%202026-11-21%2018-15-08.png)
+![Screenshot 3](screenshots/Screenshot%20From%202026-11-21%2018-46-35.png)
 
 **Description:** Calculation result displayed in English as days, hours, minutes, and seconds.
 
