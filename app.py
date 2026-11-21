@@ -23,8 +23,8 @@ class AppState:
 
 
 def format_duration(veri_tb: float, hiz_mbit: float) -> str:
-    gun, saat, dakika, saniye = aktarim_suresi(veri_tb, hiz_mbit)
-    return f"{gun} gün, {saat} saat, {dakika} dakika, {saniye} saniye"
+    days, hours, minutes, seconds = aktarim_suresi(veri_tb, hiz_mbit)
+    return f"{days} days, {hours} hours, {minutes} minutes, {seconds} seconds"
 
 
 def refresh_ip(state: AppState) -> None:
@@ -194,9 +194,9 @@ def render(stdscr, state: AppState, colors: dict[str, int]) -> None:
         safe_addstr(stdscr, row + 1, main_x + 2, clipped(prompt, inner_w), bold_attr)
         safe_addstr(stdscr, row + 3, main_x + 2, clipped("Sayı girin, Enter ile hesapla, Esc ile iptal.", inner_w), text_attr)
     elif state.mode == "result":
-        safe_addstr(stdscr, row, main_x + 2, clipped("Tahmini aktarım süresi:", inner_w), bold_attr)
+        safe_addstr(stdscr, row, main_x + 2, clipped("Estimated transfer time:", inner_w), bold_attr)
         safe_addstr(stdscr, row + 1, main_x + 2, clipped(state.calc_result, inner_w), text_attr)
-        safe_addstr(stdscr, row + 3, main_x + 2, clipped("Menüye dönmek için herhangi bir tuşa basın.", inner_w), text_attr)
+        safe_addstr(stdscr, row + 3, main_x + 2, clipped("Press any key to return to menu.", inner_w), text_attr)
 
     # History panel
     hist_w = min(width - 4, 90)
