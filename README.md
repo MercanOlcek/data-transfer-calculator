@@ -3,7 +3,7 @@
 A simple Python terminal (TUI) app that calculates estimated data transfer time and tracks IP information.  
 **Developed by Mercan Ölçek.**
 
-## Screenshots & Descriptions
+
 
 ![Screenshot 1](screenshots/Screenshot%20From%202026-11-21%2018-14-27.png)
 
